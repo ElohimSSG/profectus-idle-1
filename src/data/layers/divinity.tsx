@@ -4,20 +4,20 @@
  */
 import { main } from "data/projEntry";
 import { createCumulativeConversion } from "features/conversion";
-import { jsx } from "features/feature";
+import { CoercableComponent, Visibility, jsx } from "features/feature";
 import { createHotkey } from "features/hotkey";
 import { createReset } from "features/reset";
 import MainDisplay from "features/resources/MainDisplay.vue";
-import { createResource } from "features/resources/resource";
+import { Resource, createResource, displayResource } from "features/resources/resource";
 import { addTooltip } from "features/tooltips/tooltip";
 import { createResourceTooltip } from "features/trees/tree";
 import { BaseLayer, createLayer } from "game/layers";
 import type { DecimalSource } from "util/bignum";
 import { render } from "util/vue";
 import { createLayerTreeNode, createResetButton } from "../common";
-import { createUpgrade } from "features/upgrades/upgrade";
+import { Upgrade, UpgradeOptions, createUpgrade } from "features/upgrades/upgrade";
 import { noPersist } from "game/persistence";
-import { createCostRequirement } from "game/requirements";
+import { CostRequirement, Requirements, createCostRequirement } from "game/requirements";
 import { createSequentialModifier, createMultiplicativeModifier, createAdditiveModifier } from "game/modifiers";
 import Decimal from "util/bignum";
 import { Computable } from "util/computed";
@@ -38,21 +38,21 @@ const layer = createLayer(id, function (this: BaseLayer) {
         thingsToReset: (): Record<string, unknown>[] => [layer]
     }));
 
-    const upgradesRow1: Array<Upgrade<{cost: Computable<DecimalSource};
-    resource: 
-    
-    
-    
-    = createUpgrade(() => ({
-        requirements: createCostRequirement(() => ({
-            resource: noPersist(points),
-            cost: 1
-        })),
-        display: {
-            title: "Absorbing points",
-            description: "Absorb 1 point every second from your surroundings"
-        }
-    }));
+    const upgradesRow1: Array<Upgrade<{
+        requirements: CostRequirement;
+        display: Computable<any>;
+    }>> = [
+        createUpgrade(() => ({
+            requirements: createCostRequirement(() => ({
+                resource: noPersist(points),
+                cost: 1
+            })),
+            display: {
+                title: "Absorbing points",
+                description: "Absorb 1 point every second from your surroundings"
+            }
+        }))
+    ];
 
     const treeNode = createLayerTreeNode(() => ({
         layerID: id,
