@@ -4,23 +4,23 @@
  */
 import { main } from "data/projEntry";
 import { createCumulativeConversion } from "features/conversion";
-import { CoercableComponent, Visibility, jsx } from "features/feature";
+import { jsx } from "features/feature";
 import { createHotkey } from "features/hotkey";
 import { createReset } from "features/reset";
 import MainDisplay from "features/resources/MainDisplay.vue";
-import { Resource, createResource, displayResource } from "features/resources/resource";
+import { createResource } from "features/resources/resource";
 import { addTooltip } from "features/tooltips/tooltip";
 import { createResourceTooltip } from "features/trees/tree";
 import { BaseLayer, createLayer } from "game/layers";
 import type { DecimalSource } from "util/bignum";
 import { render } from "util/vue";
 import { createLayerTreeNode, createResetButton } from "../common";
-import { Upgrade, UpgradeOptions, createUpgrade } from "features/upgrades/upgrade";
+import { Upgrade, createUpgrade } from "features/upgrades/upgrade";
 import { noPersist } from "game/persistence";
-import { CostRequirement, Requirements, createCostRequirement } from "game/requirements";
-import { createSequentialModifier, createMultiplicativeModifier, createAdditiveModifier } from "game/modifiers";
-import Decimal from "util/bignum";
+import { CostRequirement, createCostRequirement } from "game/requirements";
 import { Computable } from "util/computed";
+import { computed } from "@vue/reactivity";
+import Decimal from "util/bignum";
 
 const id = "d";
 const layer = createLayer(id, function (this: BaseLayer) {
@@ -37,6 +37,14 @@ const layer = createLayer(id, function (this: BaseLayer) {
     const reset = createReset(() => ({
         thingsToReset: (): Record<string, unknown>[] => [layer]
     }));
+
+    const upgradeEffects = {
+        0: computed(() => {
+            let ret = new Decimal(1);
+            // if modifiers to this come later, add more here
+            return ret;
+        })
+    }
 
     const upgradesRow1: Array<Upgrade<{
         requirements: CostRequirement;
@@ -101,6 +109,7 @@ const layer = createLayer(id, function (this: BaseLayer) {
         )),
         treeNode,
         upgradesRow1,
+        upgradeEffects,
         hotkey
     };
 });

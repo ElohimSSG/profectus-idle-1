@@ -24,6 +24,7 @@ export const main = createLayer("main", function (this: BaseLayer) {
 
     const pointGain = computed(() => {
         let base = new Decimal(0);
+        if (divinity.upgradesRow1[0].bought.value) base = base.plus(divinity.upgradeEffects[0].value);
 
         let gain = base
         return gain;
@@ -32,7 +33,7 @@ export const main = createLayer("main", function (this: BaseLayer) {
     globalBus.on("update", diff => {
         points.value = Decimal.add(points.value, Decimal.times(pointGain.value, diff));
     });
-    
+
     const oomps = trackOOMPS(points, pointGain);
 
     const tree = createTree(() => ({
