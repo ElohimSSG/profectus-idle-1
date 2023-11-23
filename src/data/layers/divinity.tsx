@@ -15,12 +15,18 @@ import { BaseLayer, createLayer } from "game/layers";
 import type { DecimalSource } from "util/bignum";
 import { render } from "util/vue";
 import { createLayerTreeNode, createResetButton } from "../common";
+import { createUpgrade } from "features/upgrades/upgrade";
+import { noPersist } from "game/persistence";
+import { createCostRequirement } from "game/requirements";
+import { createSequentialModifier, createMultiplicativeModifier, createAdditiveModifier } from "game/modifiers";
+import Decimal from "util/bignum";
+import { Computable } from "util/computed";
 
-const id = "p";
+const id = "d";
 const layer = createLayer(id, function (this: BaseLayer) {
-    const name = "Prestige";
-    const color = "#4BDC13";
-    const points = createResource<DecimalSource>(0, "prestige points");
+    const name = "Divinity";
+    const color = "#BA2B2B";
+    const points = createResource<DecimalSource>(0, "divinity");
 
     const conversion = createCumulativeConversion(() => ({
         formula: x => x.div(10).sqrt(),
@@ -32,11 +38,28 @@ const layer = createLayer(id, function (this: BaseLayer) {
         thingsToReset: (): Record<string, unknown>[] => [layer]
     }));
 
+    const upgradesRow1: Array<Upgrade<{cost: Computable<DecimalSource};
+    resource: 
+    
+    
+    
+    = createUpgrade(() => ({
+        requirements: createCostRequirement(() => ({
+            resource: noPersist(points),
+            cost: 1
+        })),
+        display: {
+            title: "Absorbing points",
+            description: "Absorb 1 point every second from your surroundings"
+        }
+    }));
+
     const treeNode = createLayerTreeNode(() => ({
         layerID: id,
         color,
         reset
     }));
+
     const tooltip = addTooltip(treeNode, {
         display: createResourceTooltip(points),
         pinnable: true
@@ -49,8 +72,8 @@ const layer = createLayer(id, function (this: BaseLayer) {
     }));
 
     const hotkey = createHotkey(() => ({
-        description: "Reset for prestige points",
-        key: "p",
+        description: "Reset for divinity",
+        key: "d",
         onPress: resetButton.onClick
     }));
 
@@ -63,9 +86,21 @@ const layer = createLayer(id, function (this: BaseLayer) {
             <>
                 <MainDisplay resource={points} color={color} />
                 {render(resetButton)}
+                <br/>
+                <br/>
+                <table>
+                    <tbody>
+                        <tr>
+                            {upgradesRow1.map(upg => (
+                                <td>{render(upg)}</td>
+                            ))}
+                        </tr>
+                    </tbody>
+                </table>
             </>
         )),
         treeNode,
+        upgradesRow1,
         hotkey
     };
 });

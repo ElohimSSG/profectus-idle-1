@@ -4,14 +4,20 @@
             <h2>Changelog</h2>
         </template>
         <template v-slot:body>
+            <!--
             <details open>
-                <summary>v0.0 Initial Commit - <time>2021-09-04</time></summary>
-                This is the first release :D
+                <summary>v0.1 Exodus - <time>2023-11-23</time></summary>
+                First update
                 <ul>
-                    <li class="feature">Did everything</li>
-                    <li class="fix">Had some fun</li>
-                    <li class="breaking">Removed everything</li>
-                    <li class="balancing">Created some bugs to fix later</li>
+                    <li class="feature">Base Demo Version of the game</li>
+                </ul>
+            </details>
+            -->
+            <details open>
+                <summary>v0.0 Genesis - <time>2023-11-23</time></summary>
+                The very initial release of Elohim's Tree :D
+                <ul>
+                    <li class="feature">Base Demo Version of the game</li>
                 </ul>
             </details>
         </template>

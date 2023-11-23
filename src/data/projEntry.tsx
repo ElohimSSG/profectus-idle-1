@@ -12,7 +12,7 @@ import type { DecimalSource } from "util/bignum";
 import Decimal, { format, formatTime } from "util/bignum";
 import { render } from "util/vue";
 import { computed, toRaw } from "vue";
-import prestige from "./layers/prestige";
+import divinity from "./layers/divinity";
 
 /**
  * @hidden
@@ -23,20 +23,23 @@ export const main = createLayer("main", function (this: BaseLayer) {
     const total = trackTotal(points);
 
     const pointGain = computed(() => {
-        // eslint-disable-next-line prefer-const
-        let gain = new Decimal(1);
+        let base = new Decimal(0);
+
+        let gain = base
         return gain;
     });
+
     globalBus.on("update", diff => {
         points.value = Decimal.add(points.value, Decimal.times(pointGain.value, diff));
     });
+    
     const oomps = trackOOMPS(points, pointGain);
 
     const tree = createTree(() => ({
-        nodes: [[prestige.treeNode]],
+        nodes: [[divinity.treeNode]],
         branches: [],
         onReset() {
-            points.value = toRaw(this.resettingNode.value) === toRaw(prestige.treeNode) ? 0 : 10;
+            points.value = toRaw(this.resettingNode.value) === toRaw(divinity.treeNode) ? 0 : 10;
             best.value = points.value;
             total.value = points.value;
         },
@@ -80,7 +83,7 @@ export const main = createLayer("main", function (this: BaseLayer) {
 export const getInitialLayers = (
     /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
     player: Partial<Player>
-): Array<GenericLayer> => [main, prestige];
+): Array<GenericLayer> => [main, divinity];
 
 /**
  * A computed ref whose value is true whenever the game is over.
