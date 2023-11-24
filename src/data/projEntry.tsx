@@ -13,6 +13,7 @@ import Decimal, { format, formatTime } from "util/bignum";
 import { render } from "util/vue";
 import { computed, toRaw } from "vue";
 import divinity from "./layers/divinity";
+import cultivation from "./layers/cultivation";
 
 /**
  * @hidden
@@ -37,7 +38,8 @@ export const main = createLayer("main", function (this: BaseLayer) {
     const oomps = trackOOMPS(points, pointGain);
 
     const tree = createTree(() => ({
-        nodes: [[divinity.treeNode]],
+        nodes: [[cultivation.treeNode],
+                [divinity.treeNode]],
         branches: [],
         onReset() {
             points.value = toRaw(this.resettingNode.value) === toRaw(divinity.treeNode) ? 0 : 10;
@@ -84,7 +86,7 @@ export const main = createLayer("main", function (this: BaseLayer) {
 export const getInitialLayers = (
     /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
     player: Partial<Player>
-): Array<GenericLayer> => [main, divinity];
+): Array<GenericLayer> => [main, divinity, cultivation];
 
 /**
  * A computed ref whose value is true whenever the game is over.

@@ -25,7 +25,7 @@ import Decimal from "util/bignum";
 const id = "d";
 const layer = createLayer(id, function (this: BaseLayer) {
     const name = "Divinity";
-    const color = "#BA2B2B";
+    const color = "#AE2B3D";
     const points = createResource<DecimalSource>(0, "divinity");
 
     const conversion = createCumulativeConversion(() => ({
@@ -37,30 +37,6 @@ const layer = createLayer(id, function (this: BaseLayer) {
     const reset = createReset(() => ({
         thingsToReset: (): Record<string, unknown>[] => [layer]
     }));
-
-    const upgradeEffects = {
-        0: computed(() => {
-            let ret = new Decimal(1);
-            // if modifiers to this come later, add more here
-            return ret;
-        })
-    }
-
-    const upgradesRow1: Array<Upgrade<{
-        requirements: CostRequirement;
-        display: Computable<any>;
-    }>> = [
-        createUpgrade(() => ({
-            requirements: createCostRequirement(() => ({
-                resource: noPersist(points),
-                cost: 1
-            })),
-            display: {
-                title: "Absorbing points",
-                description: "Absorb 1 point every second from your surroundings"
-            }
-        }))
-    ];
 
     const treeNode = createLayerTreeNode(() => ({
         layerID: id,
@@ -85,6 +61,45 @@ const layer = createLayer(id, function (this: BaseLayer) {
         onPress: resetButton.onClick
     }));
 
+    // Upgrades and Stuff:
+    
+    const upgradeEffects = {
+        0: computed(() => {
+            let ret = new Decimal(1);
+            // if modifiers to this come later, add more here
+            return ret;
+        })
+    }
+
+    const upgradesRow1: Array<Upgrade<{
+        requirements: CostRequirement;
+        display: Computable<any>;
+    }>> = [
+        createUpgrade(() => ({
+            requirements: createCostRequirement(() => ({
+                resource: noPersist(points),
+                cost: 1
+            })),
+            display: {
+                title: "Absorbing points",
+                description: "Absorb 1 point every second from your surroundings"
+            }
+        }))
+    ];
+    
+    const cultivationPoint = createUpgrade(() => ({
+        requirements: createCostRequirement(() => ({
+            resource: noPersist(points),
+            cost: 10000
+        })),
+        display: {
+            title: "Cultivation Point",
+            description: "Master Divinity and get 1 Cultivation Point"
+        }
+    }))
+
+    // Return
+
     return {
         name,
         color,
@@ -105,12 +120,16 @@ const layer = createLayer(id, function (this: BaseLayer) {
                         </tr>
                     </tbody>
                 </table>
+                <br/>
+                <br/>
+                {render(cultivationPoint)}
             </>
         )),
+        hotkey,
         treeNode,
         upgradesRow1,
         upgradeEffects,
-        hotkey
+        cultivationPoint
     };
 });
 
