@@ -28,6 +28,7 @@ export const main = createLayer("main", function (this: BaseLayer) {
         if (divinity.upgradesRow1[0].bought.value) base = base.plus(divinity.upgradeEffects[0].value);
 
         let gain = base
+        if (divinity.upgradesRow1[1].bought.value) gain = gain.times(divinity.upgradeEffects[1].value);
         return gain;
     });
 

@@ -68,6 +68,11 @@ const layer = createLayer(id, function (this: BaseLayer) {
             let ret = new Decimal(1);
             // if modifiers to this come later, add more here
             return ret;
+        }),
+        1: computed(() => {
+            let ret = new Decimal(2);
+
+            return ret;
         })
     }
 
@@ -83,6 +88,16 @@ const layer = createLayer(id, function (this: BaseLayer) {
             display: {
                 title: "Absorbing points",
                 description: "Absorb 1 point every second from your surroundings"
+            }
+        })),
+        createUpgrade(() => ({
+            requirements: createCostRequirement(() => ({
+                resource: noPersist(points),
+                cost: 5
+            })),
+            display: {
+                title: "Points, but faster",
+                description: "Multiplay point gain by 2"
             }
         }))
     ];
