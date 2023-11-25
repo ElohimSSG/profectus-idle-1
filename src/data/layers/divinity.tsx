@@ -21,6 +21,11 @@ import { CostRequirement, createCostRequirement } from "game/requirements";
 import { Computable } from "util/computed";
 import { computed } from "@vue/reactivity";
 import Decimal from "util/bignum";
+import { RepeatableDisplay } from "features/repeatable";
+import { Repeatable } from "features/repeatable";
+import { Resource } from "@pixi/core";
+import { createRepeatable } from "features/repeatable";
+import { formatWhole } from "util/break_eternity";
 
 const id = "d";
 const layer = createLayer(id, function (this: BaseLayer) {
@@ -62,14 +67,40 @@ const layer = createLayer(id, function (this: BaseLayer) {
     }));
 
     // Upgrades and Stuff:
+
+    // Buyables
+    // Later the formula will look like this:
+    // Decimal.add(buyables[0].amount.value, extraBuyableLevels[0].value).times(buyablePower.value)
+
+    const repeatableEffects = {
+        0: computed(() => 
+            Decimal.times(repeatables[0].amount.value, upgradeEffects[0].value)
+        )
+    }
+
+    const repeatables: Array<
+        Repeatable<{
+            requirements: CostRequirement;
+            display: Computable<RepeatableDisplay>;
+        }>
+    > = [
+        createRepeatable(() => ({
+            requirements: createCostRequirement(() => ({
+                resource: noPersist(points),
+                cost: 1
+            })),
+            display: () => ({
+                title: "Absorbing",
+                description: "Start getting crumbs",
+                effectDisplay: "+" + formatWhole(repeatableEffects[0].value)
+            })
+        }))
+    ]
+
+    // Upgrades
     
     const upgradeEffects = {
         0: computed(() => {
-            let ret = new Decimal(1);
-            // if modifiers to this come later, add more here
-            return ret;
-        }),
-        1: computed(() => {
             let ret = new Decimal(2);
 
             return ret;
@@ -83,21 +114,11 @@ const layer = createLayer(id, function (this: BaseLayer) {
         createUpgrade(() => ({
             requirements: createCostRequirement(() => ({
                 resource: noPersist(points),
-                cost: 1
-            })),
-            display: {
-                title: "Absorbing points",
-                description: "Absorb 1 point every second from your surroundings"
-            }
-        })),
-        createUpgrade(() => ({
-            requirements: createCostRequirement(() => ({
-                resource: noPersist(points),
                 cost: 5
             })),
             display: {
-                title: "Points, but faster",
-                description: "Multiplay point gain by 2"
+                title: "Faster Absorbing",
+                description: "Double the points gained by Absorbing"
             }
         }))
     ];
@@ -105,7 +126,7 @@ const layer = createLayer(id, function (this: BaseLayer) {
     const cultivationPoint = createUpgrade(() => ({
         requirements: createCostRequirement(() => ({
             resource: noPersist(points),
-            cost: 10000
+            cost: new Decimal("1e1e3")
         })),
         display: {
             title: "Cultivation Point",
@@ -129,6 +150,16 @@ const layer = createLayer(id, function (this: BaseLayer) {
                 <table>
                     <tbody>
                         <tr>
+                            {repeatables.map(upg => (
+                                <td>{render(upg)}</td>
+                            ))}
+                        </tr>
+                    </tbody>
+                </table>
+                <br/>
+                <table>
+                    <tbody>
+                        <tr>
                             {upgradesRow1.map(upg => (
                                 <td>{render(upg)}</td>
                             ))}
@@ -142,6 +173,8 @@ const layer = createLayer(id, function (this: BaseLayer) {
         )),
         hotkey,
         treeNode,
+        repeatableEffects,
+        repeatables,
         upgradesRow1,
         upgradeEffects,
         cultivationPoint

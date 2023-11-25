@@ -19,16 +19,16 @@ import cultivation from "./layers/cultivation";
  * @hidden
  */
 export const main = createLayer("main", function (this: BaseLayer) {
-    const points = createResource<DecimalSource>(10);
+    const points = createResource<DecimalSource>(10, "crumbs");
     const best = trackBest(points);
     const total = trackTotal(points);
 
     const pointGain = computed(() => {
         let base = new Decimal(0);
-        if (divinity.upgradesRow1[0].bought.value) base = base.plus(divinity.upgradeEffects[0].value);
-
+        base = base.plus(divinity.repeatableEffects[0].value);
+        
         let gain = base
-        if (divinity.upgradesRow1[1].bought.value) gain = gain.times(divinity.upgradeEffects[1].value);
+        
         return gain;
     });
 
@@ -65,7 +65,7 @@ export const main = createLayer("main", function (this: BaseLayer) {
                 <div>
                     {Decimal.lt(points.value, "1e1000") ? <span>You have </span> : null}
                     <h2>{format(points.value)}</h2>
-                    {Decimal.lt(points.value, "1e1e6") ? <span> points</span> : null}
+                    {Decimal.lt(points.value, "1e1e6") ? <span> crumbs</span> : null}
                 </div>
                 {Decimal.gt(pointGain.value, 0) ? <div>({oomps.value})</div> : null}
                 <Spacer />
