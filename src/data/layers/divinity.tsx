@@ -89,14 +89,19 @@ const layer = createLayer(id, function (this: BaseLayer) {
             let ret = repeatables[0].amount.value
             let multipliers = repeatableEffects[1].value
             if (upgrades[0][0].bought.value) Decimal.add(multipliers, upgradeEffects[0].value)
-            return Decimal.times(ret, multipliers);
+            return Decimal.pow(Decimal.times(ret, multipliers), repeatableEffects[2].value);
         }),
         1: computed(() =>
             Decimal.add(1, Decimal.times(0.25, repeatables[1].amount.value))
+        ),
+        2: computed(() =>
+            Decimal.add(1, Decimal.times(0.01, repeatables[2].amount.value))
         )
     }
 
-// TODO: implement that the effect of upgrade 2 updates
+    globalBus.on("update", diff => {
+        if (upgrades[1][0].bought.value) points.value = Decimal.plus(points.value, conversion.currentGain.value);
+    });
 
     const repeatables: Array<
         Repeatable<{
@@ -132,6 +137,21 @@ const layer = createLayer(id, function (this: BaseLayer) {
                     title: "Strengthening",
                     description: "Increase your crumb gain",
                     effectDisplay: "x" + format(repeatableEffects[1].value)
+                })
+            })),
+            createRepeatable(() => ({
+                requirements: createCostRequirement(() => ({
+                    resource: noPersist(points),
+                    cost() {
+                        let aof = Decimal.add(repeatables[2].amount.value, 1);
+                        let ret = Decimal.floor(Decimal.pow(10, Decimal.root(aof, 1.7)).div(repeatableCostDiv.value).pow(repeatableCostExp.value));
+                        return ret;
+                    }
+                })),
+                display: () => ({
+                    title: "Exponentialism",
+                    description: "Increase your crumb gain, but exponantially",
+                    effectDisplay: "^" + format(repeatableEffects[2].value)
                 })
             }))
         ]
