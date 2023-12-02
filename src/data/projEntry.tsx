@@ -28,7 +28,9 @@ export const main = createLayer("main", function (this: BaseLayer) {
         base = base.plus(divinity.repeatableEffects[0].value);
         
         let gain = base
-        
+        if (divinity.upgrades[0][0].bought.value) gain = gain.times(divinity.upgradeEffects[0].value);
+        if (divinity.upgrades[0][1].bought.value) gain = gain.times(divinity.upgradeEffects[1].value);
+
         return gain;
     });
 

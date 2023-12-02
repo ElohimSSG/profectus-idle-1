@@ -26,6 +26,7 @@ import { Repeatable } from "features/repeatable";
 import { Resource } from "@pixi/core";
 import { createRepeatable } from "features/repeatable";
 import { format, formatWhole } from "util/break_eternity";
+import { globalBus } from "game/events";
 
 const id = "d";
 const layer = createLayer(id, function (this: BaseLayer) {
@@ -90,10 +91,12 @@ const layer = createLayer(id, function (this: BaseLayer) {
             if (upgrades[0][0].bought.value) Decimal.add(multipliers, upgradeEffects[0].value)
             return Decimal.times(ret, multipliers);
         }),
-        1: computed(() => 
+        1: computed(() =>
             Decimal.add(1, Decimal.times(0.25, repeatables[1].amount.value))
         )
     }
+
+// TODO: implement that the effect of upgrade 2 updates
 
     const repeatables: Array<
         Repeatable<{
@@ -101,45 +104,48 @@ const layer = createLayer(id, function (this: BaseLayer) {
             display: Computable<RepeatableDisplay>;
         }>
     > = [
-        createRepeatable(() => ({
-            requirements: createCostRequirement(() => ({
-                resource: noPersist(points),
-                cost() {
-                    let aof = repeatables[0].amount.value;
-                    let ret = Decimal.pow(3, Decimal.root(aof, 2)).div(repeatableCostDiv.value).pow(repeatableCostExp.value);
-                    return ret;
-                }
+            createRepeatable(() => ({
+                requirements: createCostRequirement(() => ({
+                    resource: noPersist(points),
+                    cost() {
+                        let aof = repeatables[0].amount.value;
+                        let ret = Decimal.floor(Decimal.pow(3, Decimal.root(aof, 2.2)).div(repeatableCostDiv.value).pow(repeatableCostExp.value));
+                        return ret;
+                    }
+                })),
+                display: () => ({
+                    title: "Absorbing",
+                    description: "Start getting crumbs",
+                    effectDisplay: "+" + formatWhole(repeatableEffects[0].value)
+                })
             })),
-            display: () => ({
-                title: "Absorbing",
-                description: "Start getting crumbs",
-                effectDisplay: "+" + formatWhole(repeatableEffects[0].value)
-            })
-        })),
-        createRepeatable(() => ({
-            requirements: createCostRequirement(() => ({
-                resource: noPersist(points),
-                cost() {
-                    let aof = Decimal.add(repeatables[1].amount.value, 1);
-                    let ret = Decimal.pow(5, Decimal.root(aof, 2)).div(repeatableCostDiv.value).pow(repeatableCostExp.value);
-                    return ret;
-                }
-            })),
-            display: () => ({
-                title: "Strengthening",
-                description: "Increase your crumb gain",
-                effectDisplay: "x" + format(repeatableEffects[1].value)
-            })
-        }))
-    ]
+            createRepeatable(() => ({
+                requirements: createCostRequirement(() => ({
+                    resource: noPersist(points),
+                    cost() {
+                        let aof = Decimal.add(repeatables[1].amount.value, 1);
+                        let ret = Decimal.floor(Decimal.pow(5, Decimal.root(aof, 2.2)).div(repeatableCostDiv.value).pow(repeatableCostExp.value));
+                        return ret;
+                    }
+                })),
+                display: () => ({
+                    title: "Strengthening",
+                    description: "Increase your crumb gain",
+                    effectDisplay: "x" + format(repeatableEffects[1].value)
+                })
+            }))
+        ]
 
     // Upgrades
-    
+
     const upgradeEffects = {
         0: computed(() => {
             let ret = new Decimal(2);
 
             return ret;
+        }),
+        1: computed(() => {
+            return Decimal.add(1, Decimal.times(0.1, Decimal.root(points.value, 2)))
         })
     }
 
@@ -158,11 +164,35 @@ const layer = createLayer(id, function (this: BaseLayer) {
             })),
             display: {
                 title: "Faster Absorbing",
-                description: "Double the points gained by Absorbing"
+                description: "Double the points gained by Absorbing",
+                effectDisplay: "x" + formatWhole(upgradeEffects[0].value)
+            }
+        })),
+        createUpgrade(() => ({
+            requirements: createCostRequirement(() => ({
+                resource: noPersist(points),
+                cost: 250
+            })),
+            display: {
+                title: "Crumb Divinity Feedback",
+                description: "Increase your Crumb Gain by current Divinity",
+                effectDisplay: "x" + format(upgradeEffects[1].value)
+            }
+        }))
+    ],
+    [
+        createUpgrade(() => ({
+            requirements: createCostRequirement(() => ({
+                resource: noPersist(points),
+                cost: 1e10
+            })),
+            display: {
+                title: "Auto Divinity",
+                description: "Automatically get your Divinity on reset per second"
             }
         }))
     ]];
-    
+
     const cultivationPoint = createUpgrade(() => ({
         requirements: createCostRequirement(() => ({
             resource: noPersist(points),
@@ -185,8 +215,7 @@ const layer = createLayer(id, function (this: BaseLayer) {
             <>
                 <MainDisplay resource={points} color={color} />
                 {render(resetButton)}
-                <br/>
-                <br/>
+                <br />
                 <table>
                     <tbody>
                         <tr>
@@ -196,20 +225,19 @@ const layer = createLayer(id, function (this: BaseLayer) {
                         </tr>
                     </tbody>
                 </table>
-                <br/>
+                <br />
                 <table>
                     <tbody>
                         {upgrades.map(upgRow => (
                             <tr>
                                 {upgRow.map(upg => (
-                                <td>{render(upg)}</td>
-                            ))}
+                                    <td>{render(upg)}</td>
+                                ))}
                             </tr>
                         ))}
                     </tbody>
                 </table>
-                <br/>
-                <br/>
+                <br />
                 {render(cultivationPoint)}
             </>
         )),
